@@ -1,7 +1,7 @@
 import sys
 from getpass import getpass
 from jnpr.junos import Device
-from jnpr.junos.exception import ConnectError
+from jnpr.junos.exception import ConnectUnknownHostError, ConnectTimeoutError, ConnectRefusedError, ConnectAuthError
 from lxml import etree
 from jnpr.junos.factory.factory_loader import FactoryLoader
 import yaml
@@ -34,22 +34,31 @@ hostname=input("IP/hostname: ")
 username=input("Username: ")
 password=getpass()
 
-# Open device connection
-with Device(host=hostname, user=username, passwd=password) as dev:
-    # Define table and gather info
-    interfaces=InterfaceTable(dev)
-    interfaces.get()
+try:
+  # Open device connection
+  with Device(host=hostname, user=username, passwd=password) as dev:
+      # Define table and gather info
+      interfaces=InterfaceTable(dev)
+      interfaces.get()
 
-    # Gather Device hostname for csv
-    switch=dev.facts['hostname']
+      # Gather Device hostname for csv
+      switch=dev.facts['hostname']
 
-    # Create and write CSV file
-    with open("interface-report.csv", "w", newline="") as csvfile:
-      writer = csv.writer(csvfile)
+      # Create and write CSV file
+      with open("interface-report.csv", "w", newline="") as csvfile:
+        writer = csv.writer(csvfile)
 
-      # Write headers
-      writer.writerow(["switch","interface","adminStatus","physicalStatus","lastStatusChangeDays"])
-      
-      # Create a new row with the interface info
-      for interface in interfaces:
-          writer.writerow([switch,interface.name, interface.adminStatus, interface.status, (interface.flap/60/60/24)])
+        # Write headers
+        writer.writerow(["switch","interface","adminStatus","physicalStatus","lastStatusChangeDays"])
+        
+        # Create a new row with the interface info
+        for interface in interfaces:
+            writer.writerow([switch,interface.name, interface.adminStatus, interface.status, (interface.flap/60/60/24)])
+except ConnectUnknownHostError:
+   print(f'Unable to {hostname}')
+except ConnectTimeoutError:
+   print(f'Connection timed out to {hostname}')
+except ConnectRefusedError:
+   print(f'{hostname} refused connection')
+except ConnectAuthError:
+   print(f'Username or password incorrect on {hostname}')
