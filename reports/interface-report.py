@@ -42,10 +42,13 @@ try:
       interfaces.get()
 
       # Gather Device hostname for csv
-      switch=dev.facts['hostname']
+      if dev.facts['hostname'] is not None:
+        switch=dev.facts['hostname']
+      else:
+         switch=hostname
 
       # Create and write CSV file
-      with open("interface-report.csv", "w", newline="") as csvfile:
+      with open(f"{switch}-interfaces.csv", "w", newline="") as csvfile:
         writer = csv.writer(csvfile)
 
         # Write headers
