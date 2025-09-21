@@ -42,7 +42,7 @@ try:
       interfaces.get()
 
       # Gather Device hostname for csv
-      if dev.facts['hostname'] is not None:
+      if dev.facts['hostname']!='':
         switch=dev.facts['hostname']
       else:
          switch=hostname
