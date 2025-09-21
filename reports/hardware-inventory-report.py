@@ -43,7 +43,7 @@ try:
     # Open device connection
     with Device(host=hostname, user=username, passwd=password) as dev:
         # Define table and gather info
-        modules=ChassisInventoryTable(dev)
+        modules=ChassisInventoryTable(dev) # type: ignore
         modules.get()
 
         # Gather Device hostname for csv

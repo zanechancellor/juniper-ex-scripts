@@ -38,7 +38,7 @@ try:
   # Open device connection
   with Device(host=hostname, user=username, passwd=password) as dev:
       # Define table and gather info
-      interfaces=InterfaceTable(dev)
+      interfaces=InterfaceTable(dev) # type: ignore
       interfaces.get()
 
       # Gather Device hostname for csv
