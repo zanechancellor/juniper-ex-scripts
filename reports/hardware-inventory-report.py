@@ -67,8 +67,8 @@ try:
 except ConnectUnknownHostError:
     print(f'Unable to {hostname}')
 except ConnectTimeoutError:
-   print(f'Connection timed out to {hostname}')
+    print(f'Connection timed out to {hostname}')
 except ConnectRefusedError:
-   print(f'{hostname} refused connection')
+    print(f'{hostname} refused connection')
 except ConnectAuthError:
-   print(f'Username or password incorrect on {hostname}')
+    print(f'Username or password incorrect on {hostname}')
