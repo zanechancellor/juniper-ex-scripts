@@ -13,7 +13,7 @@ juniperTables="""
 InterfaceTable:
   rpc: get-interface-information
   args:
-    interface_name: '[afgxe][et]-*'
+    interface_name: 'm?[afgxe][et]-*'
   args_key: interface_name
   item: physical-interface
   view: InterfaceView
