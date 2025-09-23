@@ -12,10 +12,7 @@ juniperTables="""
 ---
 InterfaceTable:
   rpc: get-interface-information
-  args:
-    interface_name: 'm?[afgxe][et]-*'
-  args_key: interface_name
-  item: physical-interface
+  item: physical-interface[starts-with(name, 'ge-') or starts-with(name, 'xe-') or starts-with(name, 'mge-') or starts-with(name, 'ae')]
   view: InterfaceView
 
 InterfaceView:
