@@ -5,10 +5,16 @@ from jnpr.junos.exception import ConnectUnknownHostError, ConnectTimeoutError, C
 
 conf_file = 'configs/ntp.conf'
 config_vars = {
-    'ntpserver': [{'address':'10.0.0.0','key':'101'}, {'address':'10.0.0.1'}],
+    'ntpserver': [{'address':'129.6.15.28 ', 'key':False, 'primary':False}, {'address':'129.6.15.29', 'primary':True}],
     'ntpkey': [{'id':'101', 'type':'sha256', 'value':'Lab1234!!'}],
-    'trustedkeys': ['101']
+    'trustedkeys': ['101','100']
 }
+
+# config_vars = {
+#     'ntpserver': [{'address':'10.0.0.0 ', 'key':101, 'primary':False}, {'address':'10.0.0.1', 'primary':True}],
+#     'ntpkey': [{'id':'101', 'type':'sha256', 'value':'Lab1234!!'}],
+#     'trustedkeys': ['101','100']
+# }
 
 # Gather login info
 hostname=input("IP/hostname: ")
