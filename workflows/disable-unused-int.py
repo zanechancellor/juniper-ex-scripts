@@ -39,6 +39,12 @@ try:
 		interfaces=InterfaceTable(dev) # type: ignore
 		interfaces.get()
 
+		if dev.facts['hostname']!='':
+			switch=dev.facts['hostname']
+		else:
+			switch=hostname
+
+		# Go through each interface and see if the amount of seconds is greater than 30 days (2592000 seconds) and delete the config and set to disable
 		with Config(dev, mode='private') as cu:
 			for interface in interfaces:
 				print(interface.values())
@@ -46,10 +52,16 @@ try:
 					cu.load(f'delete interfaces {interface.name}', format='set', ignore_warning="statement not found")
 					cu.load(f'set interfaces {interface.name} disable', format='set')
 			
-			cu.pdiff()
+			# Get difference between changes and current config and print to have user review changes
+			configChanges = cu.diff()
+			print(configChanges)
 			if input('Type "yes" to commit the config, otherwise discard. ').lower() =='yes':
 				cu.commit()
 				print('Commit Complete')
+
+				# Write diff to file
+				with open(f'{switch}disable-unused-int-changes', 'w') as f:
+					f.write(configChanges)
 			else:
 				print('Config not commited')
 except ConnectUnknownHostError:
