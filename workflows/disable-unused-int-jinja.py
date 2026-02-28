@@ -23,6 +23,14 @@ InterfaceView:
     status: oper-status
     flap: { interface-flapped/@seconds : int }
 
+Dot1xInterfaceTable:
+  rpc: get-dot1x-interface-information
+  item: interface 
+  view: Dot1xInterfaceView
+
+Dot1xInterfaceView:
+  fields:
+    name: interface-name
 """
 
 interfaceConfig="""
@@ -45,6 +53,8 @@ hostname=input("IP/hostname: ")
 username=input("Username: ")
 password=getpass()
 
+dot1xEnabledInterfaces=[]
+
 try:
 	# Open device connection
 	with Device(host=hostname, user=username, passwd=password) as dev:
@@ -55,6 +65,12 @@ try:
 		interfaces=InterfaceTable(dev) # type: ignore
 		interfaces.get()
 
+		# Dot1x
+		dot1xInterfaces=Dot1xInterfaceTable(dev) # type: ignore
+		dot1xInterfaces.get()
+		for interface in dot1xInterfaces:
+			dot1xEnabledInterfaces.append(interface.name.strip(".0"))
+
 		if dev.facts['hostname']!='':
 			switch=dev.facts['hostname']
 		else:
@@ -62,24 +78,27 @@ try:
 
 		# Go through each interface and see if the amount of seconds is greater than 30 days (2592000 seconds) and add the the template vars list
 		for interface in interfaces:
-			if interface.adminStatus == 'up' and interface.status == 'down' and interface.flap > 2592000:
+			if interface.adminStatus == 'up' and interface.status == 'down' and interface.flap > 2592000 and interface.name not in dot1xEnabledInterfaces:
 				templateVars['interfaces'].append(interface.name)
 
-		with Config(dev, mode='private') as cu:
-			cu.load(template=interfaceTemplate, template_vars=templateVars, format='text')
-			
-			# Get difference between changes and current config and print to have user review changes
-			configChanges = cu.diff()
-			print(configChanges)
-			if input('Type "yes" to commit the config, otherwise discard. ').lower() =='yes':
-				cu.commit()
-				print('Commit Complete')
+		if len(templateVars['interfaces']) > 0:
+			with Config(dev, mode='private') as cu:
+				cu.load(template=interfaceTemplate, template_vars=templateVars, format='text')
+				
+				# Get difference between changes and current config and print to have user review changes
+				configChanges = cu.diff()
+				print(configChanges)
+				if input('Type "yes" to commit the config, otherwise discard. ').lower() =='yes':
+					cu.commit()
+					print('Commit Complete')
 
-				# Write diff to file
-				with open(f'{switch}disable-unused-int-changes', 'w') as f:
-					f.write(configChanges)
-			else:
-				print('Config not commited')
+					# Write diff to file
+					with open(f'{switch}disable-unused-int-changes', 'w') as f:
+						f.write(configChanges)
+				else:
+					print('Config not commited')
+		else:
+			print("No changes needed")
 except ConnectUnknownHostError:
 	print(f'Unable to {hostname}')
 except ConnectTimeoutError:
