@@ -48,6 +48,10 @@ interfaceTemplate = Template(interfaceConfig)
 # Load the tables into pyez
 globals().update(FactoryLoader().load(yaml.load(juniperTables, Loader=yaml.FullLoader)))
 
+# Allow day change and automatic seconds converation
+days=30
+daysInSeconds=days*60*60*24
+
 # Gather login info
 hostname=input("IP/hostname: ")
 username=input("Username: ")
@@ -57,7 +61,7 @@ dot1xEnabledInterfaces=[]
 
 try:
 	# Open device connection
-	with Device(host=hostname, user=username, passwd=password) as dev:
+	with Device(host=hostname, user=username, passwd=password, port="22") as dev:
 		templateVars={'interfaces':[]}
 
 
@@ -78,7 +82,7 @@ try:
 
 		# Go through each interface and see if the amount of seconds is greater than 30 days (2592000 seconds) and add the the template vars list
 		for interface in interfaces:
-			if interface.adminStatus == 'up' and interface.status == 'down' and interface.flap > 2592000 and interface.name not in dot1xEnabledInterfaces:
+			if interface.adminStatus == 'up' and interface.status == 'down' and interface.flap > daysInSeconds and interface.name not in dot1xEnabledInterfaces:
 				templateVars['interfaces'].append(interface.name)
 
 		if len(templateVars['interfaces']) > 0:
