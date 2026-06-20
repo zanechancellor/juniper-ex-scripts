@@ -97,7 +97,7 @@ try:
 					print('Commit Complete')
 
 					# Write diff to file
-					with open(f'{switch}disable-unused-int-changes', 'w') as f:
+					with open(f'{switch}disable-unused-int-changes.diff', 'w') as f:
 						f.write(configChanges)
 				else:
 					print('Config not commited')
